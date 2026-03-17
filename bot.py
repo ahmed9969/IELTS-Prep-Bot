@@ -481,14 +481,23 @@ async def handle_payment_proof(update: Update, context: ContextTypes.DEFAULT_TYP
     pending = context.user_data.get("pending_payment", "subscribe")
 
     if update.message.photo:
-        await context.bot.send_message(
+        keyboard = [
+            [InlineKeyboardButton(f"✅ Activate Subscription", callback_data=f"activate_sub_{user.id}")],
+            [InlineKeyboardButton(f"🔋 Activate Top Up", callback_data=f"activate_topup_{user.id}")],
+            [InlineKeyboardButton(f"❌ Reject Payment", callback_data=f"reject_{user.id}")]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await context.bot.send_photo(
             chat_id=SUPPORT_CHAT_ID,
-            text=f"💳 New Payment Screenshot!\n\n"
-                 f"👤 Name: {user.first_name}\n"
-                 f"🆔 Telegram ID: {user.id}\n"
-                 f"💰 Payment type: {pending}\n\n"
-                 f"Please verify and use admin to activate!"
+            photo=update.message.photo[-1].file_id,
+            caption=f"💳 New Payment Screenshot!\n\n"
+                    f"👤 Name: {user.first_name}\n"
+                    f"🆔 Telegram ID: {user.id}\n"
+                    f"💰 Payment type: {pending}\n\n"
+                    f"Click a button to activate or reject:",
+            reply_markup=reply_markup
         )
+        
         await context.bot.send_photo(
             chat_id=SUPPORT_CHAT_ID,
             photo=update.message.photo[-1].file_id
@@ -674,11 +683,52 @@ async def payment_success(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"Keep practicing! 💪"
         )
 
+async def handle_admin_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    data = query.data
+
+    if data.startswith("activate_sub_"):
+        user_id = int(data.split("_")[2])
+        activate_subscription(user_id, 0)
+        await query.edit_message_caption(
+            caption=query.message.caption + "\n\n✅ Subscription activated!"
+        )
+        await context.bot.send_message(
+            chat_id=user_id,
+            text="✅ Your subscription has been activated!\n\n"
+                 "Enjoy unlimited IELTS practice for 30 days! 🎯"
+        )
+
+    elif data.startswith("activate_topup_"):
+        user_id = int(data.split("_")[2])
+        add_tests(user_id, 10)
+        await query.edit_message_caption(
+            caption=query.message.caption + "\n\n✅ Top up activated!"
+        )
+        await context.bot.send_message(
+            chat_id=user_id,
+            text="✅ Your top up has been activated!\n\n"
+                 "10 tests added to your account! 🎯"
+        )
+
+    elif data.startswith("reject_"):
+        user_id = int(data.split("_")[1])
+        await query.edit_message_caption(
+            caption=query.message.caption + "\n\n❌ Payment rejected!"
+        )
+        await context.bot.send_message(
+            chat_id=user_id,
+            text="❌ Your payment could not be verified.\n\n"
+                 "Please contact support if you believe this is a mistake."
+        )
+
 def main():
     init_db()
     app = Application.builder().token(TOKEN).build()
 
     from telegram.ext import CallbackQueryHandler
+    app.add_handler(CallbackQueryHandler(handle_admin_callback, pattern="^(activate_sub_|activate_topup_|reject_)"))
 
     conv_handler = ConversationHandler(
         entry_points=[
