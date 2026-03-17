@@ -1,12 +1,12 @@
 from telegram import Update, ReplyKeyboardMarkup, LabeledPrice, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes, ConversationHandler, PreCheckoutQueryHandler
+from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes, ConversationHandler, PreCheckoutQueryHandler, CallbackQueryHandler
 from database import init_db, add_user, get_user, can_take_test, use_test, add_tests, activate_subscription, admin_unlock, save_progress, get_progress, get_leaderboard
 from ai_generator import generate_listening_test, generate_reading_test, generate_grammar_lesson, generate_vocabulary_lesson, generate_writing_tips, generate_speaking_tips, generate_uzbek_lesson, generate_russian_lesson, text_to_audio, get_band_score
 from datetime import datetime
-
 import os
+
 TOKEN = os.environ.get("TOKEN")
-ADMIN_PASSWORD = "Sweetmama1980"
+ADMIN_PASSWORD = "Sweetmama_1980"
 SUPPORT_CHAT_ID = 1882454220
 PAYME_CARD = "9860100126345302"
 PAYME_NAME = "Niyaz Axmed"
@@ -47,86 +47,89 @@ reviews = """⭐ *What our students say:*
 "I love that it works in Uzbek too. Makes it so much easier to understand!"
 — Zulfiya, Namangan"""
 
-safety_faq = """🛡️ *Safety & Trust FAQ*
+safety_faq = """🛡️ Safety and Trust FAQ
 
-❓ *Is this bot safe to use?*
-✅ Yes! We have processed hundreds of payments safely. Your money is always protected.
+Is this bot safe to use?
+Yes! We have processed hundreds of payments safely. Your money is always protected.
 
-❓ *What if I pay and nothing happens?*
-✅ We have a 24 hour money back guarantee — no questions asked! Just contact support.
+What if I pay and nothing happens?
+We have a 24 hour money back guarantee — no questions asked! Just contact support.
 
-❓ *How do I know this is not a scam?*
-✅ Try our 5 FREE tests first — no payment needed. See the quality yourself before paying!
+How do I know this is not a scam?
+Try our 5 FREE tests first — no payment needed. See the quality yourself before paying!
 
-❓ *Is my payment information safe?*
-✅ We use Payme — Uzbekistan's most trusted payment platform. We never store your card details.
+Is my payment information safe?
+We use Payme — Uzbekistan's most trusted payment platform. We never store your card details.
 
-❓ *What if I have a problem?*
-✅ Contact our support team 24/7 via the Contact Support button. We respond within a few hours.
+What if I have a problem?
+Contact our support team 24/7 via the Contact Support button. We respond within a few hours.
 
-❓ *Can I get a refund?*
-✅ Yes! Full refund within 24 hours of payment if you are not satisfied."""
+Can I get a refund?
+Yes! Full refund within 24 hours of payment if you are not satisfied."""
 
 help_text = {
-    "en": """❓ *IELTS Prep Bot — How it works*
+    "en": """IELTS Prep Bot — How it works
 
-🎧 *Listening Test* — Listen to a conversation and answer 5 questions
-📖 *Reading Test* — Read a passage and answer 5 questions
-📚 *Grammar Lesson* — Learn a grammar topic with practice questions
-📝 *Vocabulary Lesson* — Learn 5 advanced IELTS words with practice
-✍️ *Writing Tips* — Get tips and templates for IELTS Writing Task 2
-🗣️ *Speaking Tips* — Get a speaking question with sample answer
-🇺🇿 *Uzbek Lesson* — English lessons explained in Uzbek
-🇷🇺 *Russian Lesson* — English lessons explained in Russian
-📊 *My Progress* — See your test scores and improvement
-🏆 *Leaderboard* — See the top 10 students
-💎 *Subscribe* — Monthly subscription for unlimited access
-🔋 *Top Up* — Buy 10 extra tests
-⭐ *Reviews* — See what other students say
-🛡️ *Safety FAQ* — Learn why we are safe and trusted
-📞 *Contact Support* — Get help from our team
+Listening Test — Listen to a conversation and answer 5 questions
+Reading Test — Read a passage and answer 5 questions
+Grammar Lesson — Learn a grammar topic with practice questions
+Vocabulary Lesson — Learn 5 advanced IELTS words with practice
+Writing Tips — Get tips and templates for IELTS Writing Task 2
+Speaking Tips — Get a speaking question with sample answer
+Uzbek Lesson — English lessons explained in Uzbek
+Russian Lesson — English lessons explained in Russian
+My Progress — See your test scores and improvement
+Leaderboard — See the top 10 students
+My Account — See your account status and subscription info
+Subscribe — Monthly subscription for unlimited access
+Top Up — Buy 10 extra tests
+Reviews — See what other students say
+Safety FAQ — Learn why we are safe and trusted
+Contact Support — Get help from our team
 
-🆓 You get 5 free tests when you start!""",
+You get 5 free tests when you start!""",
 
-    "uz": """❓ *IELTS Prep Bot — Qanday ishlaydi*
+    "uz": """IELTS Prep Bot — Qanday ishlaydi
 
-🎧 *Listening Test* — Suhbatni tinglang va 5 savolga javob bering
-📖 *Reading Test* — Matnni o'qing va 5 savolga javob bering
-📚 *Grammar Lesson* — Grammatika mavzusini o'rganing
-📝 *Vocabulary Lesson* — 5 ta yangi IELTS so'zini o'rganing
-✍️ *Writing Tips* — IELTS yozish bo'yicha maslahatlar
-🗣️ *Speaking Tips* — Namunaviy javob bilan gapirish savoli
-🇺🇿 *Uzbek Lesson* — O'zbek tilida ingliz tili darslari
-🇷🇺 *Russian Lesson* — Rus tilida ingliz tili darslari
-📊 *My Progress* — Natijalaringizni ko'ring
-🏆 *Leaderboard* — Top 10 talabalar
-💎 *Subscribe* — Oylik obuna cheksiz kirish uchun
-🔋 *Top Up* — 10 ta qo'shimcha test sotib oling
-⭐ *Reviews* — Boshqa talabalar fikrlari
-🛡️ *Safety FAQ* — Xavfsizlik haqida
-📞 *Contact Support* — Yordam oling
+Listening Test — Suhbatni tinglang va 5 savolga javob bering
+Reading Test — Matnni o'qing va 5 savolga javob bering
+Grammar Lesson — Grammatika mavzusini o'rganing
+Vocabulary Lesson — 5 ta yangi IELTS so'zini o'rganing
+Writing Tips — IELTS yozish bo'yicha maslahatlar
+Speaking Tips — Namunaviy javob bilan gapirish savoli
+Uzbek Lesson — O'zbek tilida ingliz tili darslari
+Russian Lesson — Rus tilida ingliz tili darslari
+My Progress — Natijalaringizni ko'ring
+Leaderboard — Top 10 talabalar
+My Account — Hisob holatingizni ko'ring
+Subscribe — Oylik obuna cheksiz kirish uchun
+Top Up — 10 ta qo'shimcha test sotib oling
+Reviews — Boshqa talabalar fikrlari
+Safety FAQ — Xavfsizlik haqida
+Contact Support — Yordam oling
 
-🆓 Boshlaganda 5 ta bepul test beriladi!""",
+Boshlaganda 5 ta bepul test beriladi!""",
 
-    "ru": """❓ *IELTS Prep Bot — Как это работает*
+    "ru": """IELTS Prep Bot — Как это работает
 
-🎧 *Listening Test* — Послушайте разговор и ответьте на 5 вопросов
-📖 *Reading Test* — Прочитайте текст и ответьте на 5 вопросов
-📚 *Grammar Lesson* — Изучите тему грамматики
-📝 *Vocabulary Lesson* — Изучите 5 слов для IELTS
-✍️ *Writing Tips* — Советы по написанию IELTS Task 2
-🗣️ *Speaking Tips* — Вопрос для говорения с примером ответа
-🇺🇿 *Uzbek Lesson* — Уроки английского на узбекском
-🇷🇺 *Russian Lesson* — Уроки английского на русском
-📊 *My Progress* — Посмотрите свои результаты
-🏆 *Leaderboard* — Топ 10 студентов
-💎 *Subscribe* — Ежемесячная подписка
-🔋 *Top Up* — Купите 10 дополнительных тестов
-⭐ *Reviews* — Отзывы студентов
-🛡️ *Safety FAQ* — Вопросы безопасности
-📞 *Contact Support* — Получите помощь
+Listening Test — Послушайте разговор и ответьте на 5 вопросов
+Reading Test — Прочитайте текст и ответьте на 5 вопросов
+Grammar Lesson — Изучите тему грамматики
+Vocabulary Lesson — Изучите 5 слов для IELTS
+Writing Tips — Советы по написанию IELTS Task 2
+Speaking Tips — Вопрос для говорения с примером ответа
+Uzbek Lesson — Уроки английского на узбекском
+Russian Lesson — Уроки английского на русском
+My Progress — Посмотрите свои результаты
+Leaderboard — Топ 10 студентов
+My Account — Статус вашего аккаунта
+Subscribe — Ежемесячная подписка
+Top Up — Купите 10 дополнительных тестов
+Reviews — Отзывы студентов
+Safety FAQ — Вопросы безопасности
+Contact Support — Получите помощь
 
-🆓 При старте вы получаете 5 бесплатных тестов!"""
+При старте вы получаете 5 бесплатных тестов!"""
 }
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -149,7 +152,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         f"👋 Welcome to IELTS Prep Bot, {user.first_name}!\n\n"
         f"{status_msg}\n\n"
-        f"🎯 Practice IELTS with expert tests and lessons!\n"
+        f"Practice IELTS with expert tests and lessons!\n"
         f"Choose an option below:",
         reply_markup=reply_markup
     )
@@ -159,14 +162,13 @@ async def check_and_use_test(update: Update, context: ContextTypes.DEFAULT_TYPE)
     can_test, reason = can_take_test(update.effective_user.id)
     if not can_test:
         keyboard = [
-            [InlineKeyboardButton("💎 Subscribe (10,000 UZS/month)", callback_data="subscribe")],
-            [InlineKeyboardButton("🔋 Top Up (5,000 UZS for 10 tests)", callback_data="topup")],
-            [InlineKeyboardButton("⭐ Pay with Telegram Stars", callback_data="stars")]
+            [InlineKeyboardButton("💎 Subscribe (10,000 UZS/month)", callback_data="payme_subscribe")],
+            [InlineKeyboardButton("🔋 Top Up (5,000 UZS for 10 tests)", callback_data="payme_topup")],
+            [InlineKeyboardButton("⭐ Pay with Telegram Stars", callback_data="stars_subscribe")]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await update.message.reply_text(
-            "⚠️ You have no tests remaining!\n\n"
-            "Choose an option to continue:",
+            "⚠️ You have no tests remaining!\n\nChoose an option to continue:",
             reply_markup=reply_markup
         )
         return False
@@ -215,7 +217,11 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
             context.user_data["current_score"] = 0
             context.user_data["test_type"] = "Reading"
             q = questions[0]
-            await update.message.reply_text(f"❓ Question 1:\n\n{q['question']}\n\n{chr(10).join(q['options'])}\n\nReply with A, B, C or D")
+            leave_markup = ReplyKeyboardMarkup([["🚫 Leave Test"]], resize_keyboard=True)
+            await update.message.reply_text(
+                f"❓ Question 1:\n\n{q['question']}\n\n{chr(10).join(q['options'])}\n\nReply with A, B, C or D",
+                reply_markup=leave_markup
+            )
             return TEST
         except Exception as e:
             print(f"Reading error: {e}")
@@ -237,7 +243,11 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
             context.user_data["test_type"] = "Grammar"
             await update.message.reply_text(msg, parse_mode="Markdown")
             q = lesson["questions"][0]
-            await update.message.reply_text(f"❓ Practice Question 1:\n\n{q['question']}\n\n{chr(10).join(q['options'])}\n\nReply with A, B, C or D")
+            leave_markup = ReplyKeyboardMarkup([["🚫 Leave Test"]], resize_keyboard=True)
+            await update.message.reply_text(
+                f"❓ Practice Question 1:\n\n{q['question']}\n\n{chr(10).join(q['options'])}\n\nReply with A, B, C or D",
+                reply_markup=leave_markup
+            )
             return TEST
         except Exception as e:
             print(f"Grammar error: {e}")
@@ -259,7 +269,11 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
             context.user_data["test_type"] = "Vocabulary"
             await update.message.reply_text(msg, parse_mode="Markdown")
             q = lesson["questions"][0]
-            await update.message.reply_text(f"❓ Practice Question 1:\n\n{q['question']}\n\n{chr(10).join(q['options'])}\n\nReply with A, B, C or D")
+            leave_markup = ReplyKeyboardMarkup([["🚫 Leave Test"]], resize_keyboard=True)
+            await update.message.reply_text(
+                f"❓ Practice Question 1:\n\n{q['question']}\n\n{chr(10).join(q['options'])}\n\nReply with A, B, C or D",
+                reply_markup=leave_markup
+            )
             return TEST
         except Exception as e:
             print(f"Vocabulary error: {e}")
@@ -315,7 +329,11 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
             context.user_data["test_type"] = "Uzbek Lesson"
             await update.message.reply_text(msg, parse_mode="Markdown")
             q = lesson["questions"][0]
-            await update.message.reply_text(f"❓ Savol 1:\n\n{q['question']}\n\n{chr(10).join(q['options'])}\n\nA, B, C yoki D deb javob bering")
+            leave_markup = ReplyKeyboardMarkup([["🚫 Leave Test"]], resize_keyboard=True)
+            await update.message.reply_text(
+                f"❓ Savol 1:\n\n{q['question']}\n\n{chr(10).join(q['options'])}\n\nA, B, C yoki D deb javob bering",
+                reply_markup=leave_markup
+            )
             return TEST
         except Exception as e:
             print(f"Uzbek lesson error: {e}")
@@ -337,24 +355,17 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
             context.user_data["test_type"] = "Russian Lesson"
             await update.message.reply_text(msg, parse_mode="Markdown")
             q = lesson["questions"][0]
-            await update.message.reply_text(f"❓ Вопрос 1:\n\n{q['question']}\n\n{chr(10).join(q['options'])}\n\nОтветьте A, B, C или D")
+            leave_markup = ReplyKeyboardMarkup([["🚫 Leave Test"]], resize_keyboard=True)
+            await update.message.reply_text(
+                f"❓ Вопрос 1:\n\n{q['question']}\n\n{chr(10).join(q['options'])}\n\nОтветьте A, B, C или D",
+                reply_markup=leave_markup
+            )
             return TEST
         except Exception as e:
             print(f"Russian lesson error: {e}")
             await update.message.reply_text("❌ Произошла ошибка. Попробуйте снова!")
             return MENU
 
-    elif "Progress" in text:
-        progress = get_progress(update.effective_user.id)
-        if not progress:
-            await update.message.reply_text("📊 No tests taken yet! Start practicing to see your progress! 🎯")
-            return MENU
-        msg = "📊 *Your Progress:*\n\n"
-        for p in progress:
-            msg += f"📅 {p[6][:10]}\n📝 {p[2]}\n🎯 Score: {p[3]}/{p[4]}\n🏆 Band: {p[5]}\n─────────────\n"
-        await update.message.reply_text(msg, parse_mode="Markdown")
-        return MENU
-    
     elif "Account" in text:
         db_user = get_user(update.effective_user.id)
         if not db_user:
@@ -366,7 +377,6 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         status = db_user[4]
         trial_start = db_user[5]
         sub_end = db_user[6]
-        joined = db_user[8]
 
         if reason == "admin":
             status_msg = "👑 Admin — Unlimited Access"
@@ -379,27 +389,38 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             status_msg = "⚠️ No tests remaining"
 
-        msg = f"👤 *Your Account*\n\n"
-        msg += f"📊 Status: {status_msg}\n"
-        msg += f"🔋 Tests remaining: {tests_remaining}\n"
+        msg = f"👤 Your Account\n\n"
+        msg += f"Status: {status_msg}\n"
+        msg += f"Tests remaining: {tests_remaining}\n"
 
         if status == "trial" and trial_start:
-            msg += f"🆓 Trial started: {trial_start[:10]}\n"
+            msg += f"Trial started: {trial_start[:10]}\n"
 
         if status == "active" and sub_end:
-            msg += f"📅 Subscription started: {trial_start[:10] if trial_start else 'N/A'}\n"
-            msg += f"⏰ Subscription ends: {sub_end[:10]}\n"
+            msg += f"Subscription started: {trial_start[:10] if trial_start else 'N/A'}\n"
+            msg += f"Subscription ends: {sub_end[:10]}\n"
 
         if reason == "admin":
-            msg += f"\n👑 You have unlimited admin access!"
+            msg += f"\nYou have unlimited admin access!"
         elif not can_test:
-            msg += f"\n⚠️ You have run out of tests!"
+            msg += f"\nYou have run out of tests!"
 
-        keyboard = [[InlineKeyboardButton("🔋 Top Up — 10 tests for 5,000 UZS", callback_data="topup_payme")]]
+        keyboard = [[InlineKeyboardButton("🔋 Top Up — 10 tests for 5,000 UZS", callback_data="payme_topup")]]
         if status != "active":
-            keyboard.append([InlineKeyboardButton("💎 Subscribe — 10,000 UZS/month", callback_data="subscribe_payme")])
+            keyboard.append([InlineKeyboardButton("💎 Subscribe — 10,000 UZS/month", callback_data="payme_subscribe")])
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.message.reply_text(msg, parse_mode="Markdown", reply_markup=reply_markup)
+        await update.message.reply_text(msg, reply_markup=reply_markup)
+        return MENU
+
+    elif "Progress" in text:
+        progress = get_progress(update.effective_user.id)
+        if not progress:
+            await update.message.reply_text("📊 No tests taken yet! Start practicing to see your progress! 🎯")
+            return MENU
+        msg = "📊 Your Progress:\n\n"
+        for p in progress:
+            msg += f"📅 {p[6][:10]}\n📝 {p[2]}\n🎯 Score: {p[3]}/{p[4]}\n🏆 Band: {p[5]}\n─────────────\n"
+        await update.message.reply_text(msg)
         return MENU
 
     elif "Leaderboard" in text:
@@ -407,19 +428,18 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not leaders:
             await update.message.reply_text("🏆 No scores yet! Be the first on the leaderboard! 🎯")
             return MENU
-        msg = "🏆 *Top 10 Leaderboard:*\n\n"
+        msg = "🏆 Top 10 Leaderboard:\n\n"
         medals = ["🥇", "🥈", "🥉", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
         for i, leader in enumerate(leaders):
             msg += f"{medals[i]} {leader[0]} — {leader[1]} pts ({leader[2]} tests)\n"
-        await update.message.reply_text(msg, parse_mode="Markdown")
+        await update.message.reply_text(msg)
         return MENU
 
     elif "Subscribe" in text:
-        context.user_data["payment_type"] = "subscribe"
         await update.message.reply_text(
             "💎 Monthly Subscription — 10,000 UZS\n\n"
             "✅ Unlimited tests and lessons for 30 days\n"
-            "🔄 Up to 20 tests per day\n"
+            "📊 Up to 20 tests per day\n"
             "🔄 Cancel anytime\n"
             "💰 Money back guarantee within 24 hours\n\n"
             "Choose payment method:",
@@ -431,10 +451,9 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return MENU
 
     elif "Top Up" in text:
-        context.user_data["payment_type"] = "topup"
         await update.message.reply_text(
             "🔋 Top Up — 10 Extra Tests — 5,000 UZS\n\n"
-            "✅ 10 tests added instantly after payment\n"
+            "✅ 10 tests added after payment is verified\n"
             "💰 Money back guarantee within 24 hours\n\n"
             "Choose payment method:",
             reply_markup=InlineKeyboardMarkup([
@@ -449,12 +468,12 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return MENU
 
     elif "Safety" in text:
-        await update.message.reply_text(safety_faq, parse_mode="Markdown")
+        await update.message.reply_text(safety_faq)
         return MENU
 
     elif "Help" in text:
         msg = help_text["en"] + "\n\n" + help_text["uz"] + "\n\n" + help_text["ru"]
-        await update.message.reply_text(msg, parse_mode="Markdown")
+        await update.message.reply_text(msg)
         return MENU
 
     elif "Admin" in text:
@@ -464,9 +483,7 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif "Support" in text:
         context.user_data["support_step"] = "name"
         await update.message.reply_text(
-            "📞 Contact Support\n\n"
-            "Let's collect your details first.\n\n"
-            "Please enter your full name:"
+            "📞 Contact Support\n\nLet's collect your details first.\n\nPlease enter your full name:"
         )
         return SUPPORT
 
@@ -479,7 +496,6 @@ async def handle_payme_payment(update: Update, context: ContextTypes.DEFAULT_TYP
 
     if payment_type == "payme_subscribe" or payment_type == "subscribe_payme":
         context.user_data["pending_payment"] = "subscribe"
-        context.user_data["waiting_for_proof"] = True
         await query.message.reply_text(
             f"💳 Pay via Payme\n\n"
             f"Amount: 10,000 UZS\n"
@@ -492,11 +508,9 @@ async def handle_payme_payment(update: Update, context: ContextTypes.DEFAULT_TYP
             f"4. Send the screenshot here\n\n"
             f"💰 Money back guarantee within 24 hours!"
         )
-        return PAYMENT_PROOF
 
     elif payment_type == "payme_topup" or payment_type == "topup_payme":
         context.user_data["pending_payment"] = "topup"
-        context.user_data["waiting_for_proof"] = True
         await query.message.reply_text(
             f"💳 Pay via Payme\n\n"
             f"Amount: 5,000 UZS\n"
@@ -509,7 +523,6 @@ async def handle_payme_payment(update: Update, context: ContextTypes.DEFAULT_TYP
             f"4. Send the screenshot here\n\n"
             f"💰 Money back guarantee within 24 hours!"
         )
-        return PAYMENT_PROOF
 
     elif payment_type == "stars_subscribe":
         await query.message.reply_invoice(
@@ -528,15 +541,16 @@ async def handle_payme_payment(update: Update, context: ContextTypes.DEFAULT_TYP
             currency="XTR",
             prices=[LabeledPrice("10 Extra Tests", 10)],
         )
+
 async def handle_payment_proof(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     pending = context.user_data.get("pending_payment", "subscribe")
 
     if update.message.photo:
         keyboard = [
-            [InlineKeyboardButton(f"✅ Activate Subscription", callback_data=f"activate_sub_{user.id}")],
-            [InlineKeyboardButton(f"🔋 Activate Top Up", callback_data=f"activate_topup_{user.id}")],
-            [InlineKeyboardButton(f"❌ Reject Payment", callback_data=f"reject_{user.id}")]
+            [InlineKeyboardButton("✅ Activate Subscription", callback_data=f"activate_sub_{user.id}")],
+            [InlineKeyboardButton("🔋 Activate Top Up", callback_data=f"activate_topup_{user.id}")],
+            [InlineKeyboardButton("❌ Reject Payment", callback_data=f"reject_{user.id}")]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await context.bot.send_photo(
@@ -549,25 +563,58 @@ async def handle_payment_proof(update: Update, context: ContextTypes.DEFAULT_TYP
                     f"Click a button to activate or reject:",
             reply_markup=reply_markup
         )
-        
-        await context.bot.send_photo(
-            chat_id=SUPPORT_CHAT_ID,
-            photo=update.message.photo[-1].file_id
-        )
         await update.message.reply_text(
             "✅ Payment screenshot received!\n\n"
             "Your subscription will be activated within a few minutes.\n"
             "Thank you for your patience! 😊"
         )
+        reply_markup = ReplyKeyboardMarkup(menu_buttons, resize_keyboard=True)
+        await update.message.reply_text("Back to menu:", reply_markup=reply_markup)
+        return MENU
     else:
-        await update.message.reply_text(
-            "Please send a screenshot of your payment! 📸"
-        )
+        await update.message.reply_text("Please send a screenshot of your payment! 📸")
         return PAYMENT_PROOF
 
-    reply_markup = ReplyKeyboardMarkup(menu_buttons, resize_keyboard=True)
-    await update.message.reply_text("Back to menu:", reply_markup=reply_markup)
-    return MENU
+async def handle_admin_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    data = query.data
+
+    if data.startswith("activate_sub_"):
+        user_id = int(data.split("_")[2])
+        activate_subscription(user_id, 0)
+        await query.edit_message_caption(
+            caption=query.message.caption + "\n\n✅ Subscription activated!"
+        )
+        await context.bot.send_message(
+            chat_id=user_id,
+            text="✅ Your subscription has been activated!\n\n"
+                 "Enjoy unlimited IELTS practice for 30 days!\n"
+                 "📊 Up to 20 tests per day! 🎯"
+        )
+
+    elif data.startswith("activate_topup_"):
+        user_id = int(data.split("_")[2])
+        add_tests(user_id, 10)
+        await query.edit_message_caption(
+            caption=query.message.caption + "\n\n✅ Top up activated!"
+        )
+        await context.bot.send_message(
+            chat_id=user_id,
+            text="✅ Your top up has been activated!\n\n"
+                 "🔋 10 tests added to your account! 🎯"
+        )
+
+    elif data.startswith("reject_"):
+        user_id = int(data.split("_")[1])
+        await query.edit_message_caption(
+            caption=query.message.caption + "\n\n❌ Payment rejected!"
+        )
+        await context.bot.send_message(
+            chat_id=user_id,
+            text="❌ Your payment could not be verified.\n\n"
+                 "Please contact support if you believe this is a mistake."
+        )
 
 async def handle_admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text
@@ -577,15 +624,14 @@ async def handle_admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif text.startswith("/activate "):
         try:
             target_id = int(text.split(" ")[1])
-            payment_type = context.user_data.get("activating", "subscribe")
-            if payment_type == "topup":
-                add_tests(target_id, 10)
-                await update.message.reply_text(f"✅ Added 10 tests to user {target_id}!")
-                await context.bot.send_message(chat_id=target_id, text="✅ Your top up has been activated! 10 tests added. Enjoy! 🎯")
-            else:
-                activate_subscription(target_id, 0)
-                await update.message.reply_text(f"✅ Subscription activated for user {target_id}!")
-                await context.bot.send_message(chat_id=target_id, text="✅ Your subscription has been activated! Enjoy unlimited IELTS practice for 30 days! 🎯")
+            activate_subscription(target_id, 0)
+            await update.message.reply_text(f"✅ Subscription activated for user {target_id}!")
+            await context.bot.send_message(
+                chat_id=target_id,
+                text="✅ Your subscription has been activated!\n\n"
+                     "Enjoy unlimited IELTS practice for 30 days!\n"
+                     "📊 Up to 20 tests per day! 🎯"
+            )
         except:
             await update.message.reply_text("❌ Invalid command! Use: /activate 123456789")
     else:
@@ -645,7 +691,6 @@ async def handle_support(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "✅ Thank you! Your message has been sent to our support team!\n\n"
             "We will get back to you as soon as possible. 😊"
         )
-
         reply_markup = ReplyKeyboardMarkup(menu_buttons, resize_keyboard=True)
         await update.message.reply_text("Back to menu:", reply_markup=reply_markup)
         return MENU
@@ -653,12 +698,9 @@ async def handle_support(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def handle_test(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.text == "🚫 Leave Test":
         reply_markup = ReplyKeyboardMarkup(menu_buttons, resize_keyboard=True)
-        await update.message.reply_text(
-            "❌ Test cancelled. Returning to menu!",
-            reply_markup=reply_markup
-        )
+        await update.message.reply_text("❌ Test cancelled. Returning to menu!", reply_markup=reply_markup)
         return MENU
-    
+
     answer = update.message.text.strip().upper()
     questions = context.user_data.get("current_test", [])
     current = context.user_data.get("current_index", 0)
@@ -720,69 +762,25 @@ async def payment_success(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if payload == "monthly_subscription":
         activate_subscription(update.effective_user.id, stars)
         await update.message.reply_text(
-            f"🎉 Payment successful!\n\n"
-            f"✅ Monthly subscription activated for 30 days!\n"
-            f"Enjoy unlimited IELTS practice! 🎯"
+            "🎉 Payment successful!\n\n"
+            "✅ Monthly subscription activated for 30 days!\n"
+            "📊 Up to 20 tests per day!\n"
+            "Enjoy unlimited IELTS practice! 🎯"
         )
     elif payload == "topup_10":
         add_tests(update.effective_user.id, 10)
         db_user = get_user(update.effective_user.id)
         tests_left = db_user[9] if db_user else 10
         await update.message.reply_text(
-            f"🎉 Top up successful!\n\n"
+            "🎉 Top up successful!\n\n"
             f"🔋 10 tests added!\n"
             f"📊 Total tests remaining: {tests_left}\n\n"
-            f"Keep practicing! 💪"
-        )
-
-async def handle_admin_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
-    data = query.data
-
-    if data.startswith("activate_sub_"):
-        user_id = int(data.split("_")[2])
-        activate_subscription(user_id, 0)
-        await query.edit_message_caption(
-            caption=query.message.caption + "\n\n✅ Subscription activated!"
-        )
-        await context.bot.send_message(
-            chat_id=user_id,
-            text="✅ Your subscription has been activated!\n\n"
-                "Enjoy unlimited IELTS practice for 30 days!\n"
-                "📊 Up to 20 tests per day — no limits! 🎯"
-        )
-
-    elif data.startswith("activate_topup_"):
-        user_id = int(data.split("_")[2])
-        add_tests(user_id, 10)
-        await query.edit_message_caption(
-            caption=query.message.caption + "\n\n✅ Top up activated!"
-        )
-        await context.bot.send_message(
-            chat_id=user_id,
-            text="✅ Your top up has been activated!\n\n"
-                 "10 tests added to your account! 🎯"
-        )
-
-    elif data.startswith("reject_"):
-        user_id = int(data.split("_")[1])
-        await query.edit_message_caption(
-            caption=query.message.caption + "\n\n❌ Payment rejected!"
-        )
-        await context.bot.send_message(
-            chat_id=user_id,
-            text="❌ Your payment could not be verified.\n\n"
-                 "Please contact support if you believe this is a mistake."
+            "Keep practicing! 💪"
         )
 
 def main():
     init_db()
     app = Application.builder().token(TOKEN).build()
-
-    from telegram.ext import CallbackQueryHandler
-    app.add_handler(CallbackQueryHandler(handle_admin_callback, pattern="^(activate_sub_|activate_topup_|reject_)"))
-    app.add_handler(CallbackQueryHandler(handle_payme_payment, pattern="^(payme_subscribe|payme_topup|stars_subscribe|stars_topup|topup_payme|subscribe_payme)"))
 
     conv_handler = ConversationHandler(
         entry_points=[
@@ -791,12 +789,7 @@ def main():
         ],
         states={
             MENU: [
-            MessageHandler(filters.TEXT & ~filters.COMMAND, menu),
-            CallbackQueryHandler(handle_payme_payment, pattern="^(payme_subscribe|payme_topup|stars_subscribe|stars_topup|subscribe_payme|topup_payme)$")
-            ],
-            PAYMENT_PROOF: [
-                MessageHandler(filters.PHOTO, handle_payment_proof),
-                MessageHandler(filters.TEXT & ~filters.COMMAND, handle_payment_proof),
+                MessageHandler(filters.TEXT & ~filters.COMMAND, menu),
                 CallbackQueryHandler(handle_payme_payment, pattern="^(payme_subscribe|payme_topup|stars_subscribe|stars_topup|subscribe_payme|topup_payme)$")
             ],
             TEST: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_test)],
@@ -804,19 +797,17 @@ def main():
             SUPPORT: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_support)],
             PAYMENT_PROOF: [
                 MessageHandler(filters.PHOTO, handle_payment_proof),
-                MessageHandler(filters.TEXT & ~filters.COMMAND, handle_payment_proof)
+                MessageHandler(filters.TEXT & ~filters.COMMAND, handle_payment_proof),
+                CallbackQueryHandler(handle_payme_payment, pattern="^(payme_subscribe|payme_topup|stars_subscribe|stars_topup|subscribe_payme|topup_payme)$")
             ],
         },
-        fallbacks=[
-            CommandHandler("start", start),
-            MessageHandler(filters.TEXT & ~filters.COMMAND, start)
-        ],
+        fallbacks=[CommandHandler("start", start)],
     )
 
     app.add_handler(conv_handler)
+    app.add_handler(CallbackQueryHandler(handle_admin_callback, pattern="^(activate_sub_|activate_topup_|reject_)"))
     app.add_handler(PreCheckoutQueryHandler(precheckout))
     app.add_handler(MessageHandler(filters.SUCCESSFUL_PAYMENT, payment_success))
-    app.add_handler(CallbackQueryHandler(handle_admin_callback, pattern="^(activate_sub_|activate_topup_|reject_)"))
 
     print("IELTS Prep Bot is running! 🎯")
     app.run_polling()
