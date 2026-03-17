@@ -757,6 +757,7 @@ def main():
     app.add_handler(conv_handler)
     app.add_handler(PreCheckoutQueryHandler(precheckout))
     app.add_handler(MessageHandler(filters.SUCCESSFUL_PAYMENT, payment_success))
+    app.add_handler(CallbackQueryHandler(handle_admin_callback, pattern="^(activate_sub_|activate_topup_|reject_)"))
 
     print("IELTS Prep Bot is running! 🎯")
     app.run_polling()
