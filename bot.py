@@ -697,7 +697,8 @@ async def handle_admin_callback(update: Update, context: ContextTypes.DEFAULT_TY
         await context.bot.send_message(
             chat_id=user_id,
             text="✅ Your subscription has been activated!\n\n"
-                 "Enjoy unlimited IELTS practice for 30 days! 🎯"
+                "Enjoy unlimited IELTS practice for 30 days!\n"
+                "📊 Up to 20 tests per day — no limits! 🎯"
         )
 
     elif data.startswith("activate_topup_"):
