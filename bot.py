@@ -477,8 +477,9 @@ async def handle_payme_payment(update: Update, context: ContextTypes.DEFAULT_TYP
     await query.answer()
     payment_type = query.data
 
-    if payment_type == "payme_subscribe":
+    if payment_type == "payme_subscribe" or payment_type == "subscribe_payme":
         context.user_data["pending_payment"] = "subscribe"
+        context.user_data["waiting_for_proof"] = True
         await query.message.reply_text(
             f"💳 Pay via Payme\n\n"
             f"Amount: 10,000 UZS\n"
@@ -489,10 +490,13 @@ async def handle_payme_payment(update: Update, context: ContextTypes.DEFAULT_TYP
             f"2. Send 10,000 UZS to the card above\n"
             f"3. Take a screenshot of the payment\n"
             f"4. Send the screenshot here\n\n"
-            f"💰 Money back guarantee within 24 hours if not satisfied!"
+            f"💰 Money back guarantee within 24 hours!"
         )
-    elif payment_type == "payme_topup":
+        return PAYMENT_PROOF
+
+    elif payment_type == "payme_topup" or payment_type == "topup_payme":
         context.user_data["pending_payment"] = "topup"
+        context.user_data["waiting_for_proof"] = True
         await query.message.reply_text(
             f"💳 Pay via Payme\n\n"
             f"Amount: 5,000 UZS\n"
@@ -503,8 +507,10 @@ async def handle_payme_payment(update: Update, context: ContextTypes.DEFAULT_TYP
             f"2. Send 5,000 UZS to the card above\n"
             f"3. Take a screenshot of the payment\n"
             f"4. Send the screenshot here\n\n"
-            f"💰 Money back guarantee within 24 hours if not satisfied!"
+            f"💰 Money back guarantee within 24 hours!"
         )
+        return PAYMENT_PROOF
+
     elif payment_type == "stars_subscribe":
         await query.message.reply_invoice(
             title="IELTS Prep Bot — Monthly Subscription",
@@ -513,6 +519,7 @@ async def handle_payme_payment(update: Update, context: ContextTypes.DEFAULT_TYP
             currency="XTR",
             prices=[LabeledPrice("Monthly Subscription", 150)],
         )
+
     elif payment_type == "stars_topup":
         await query.message.reply_invoice(
             title="Top Up — 10 Extra Tests",
@@ -521,8 +528,6 @@ async def handle_payme_payment(update: Update, context: ContextTypes.DEFAULT_TYP
             currency="XTR",
             prices=[LabeledPrice("10 Extra Tests", 10)],
         )
-    return PAYMENT_PROOF
-
 async def handle_payment_proof(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     pending = context.user_data.get("pending_payment", "subscribe")
@@ -786,8 +791,13 @@ def main():
         ],
         states={
             MENU: [
-                MessageHandler(filters.TEXT & ~filters.COMMAND, menu),
-                CallbackQueryHandler(handle_payme_payment)
+            MessageHandler(filters.TEXT & ~filters.COMMAND, menu),
+            CallbackQueryHandler(handle_payme_payment, pattern="^(payme_subscribe|payme_topup|stars_subscribe|stars_topup|subscribe_payme|topup_payme)$")
+            ],
+            PAYMENT_PROOF: [
+                MessageHandler(filters.PHOTO, handle_payment_proof),
+                MessageHandler(filters.TEXT & ~filters.COMMAND, handle_payment_proof),
+                CallbackQueryHandler(handle_payme_payment, pattern="^(payme_subscribe|payme_topup|stars_subscribe|stars_topup|subscribe_payme|topup_payme)$")
             ],
             TEST: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_test)],
             ADMIN: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_admin)],
