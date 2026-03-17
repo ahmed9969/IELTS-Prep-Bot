@@ -19,10 +19,10 @@ menu_buttons = [
     ["✍️ Writing Tips", "🗣️ Speaking Tips"],
     ["🇺🇿 Uzbek Lesson", "🇷🇺 Russian Lesson"],
     ["📊 My Progress", "🏆 Leaderboard"],
-    ["💎 Subscribe", "🔋 Top Up Tests"],
-    ["⭐ Reviews", "🛡️ Safety FAQ"],
-    ["❓ Help", "🔑 Admin"],
-    ["📞 Contact Support"]
+    ["👤 My Account", "💎 Subscribe"],
+    ["🔋 Top Up Tests", "⭐ Reviews"],
+    ["🛡️ Safety FAQ", "❓ Help"],
+    ["🔑 Admin", "📞 Contact Support"]
 ]
 
 reviews = """⭐ *What our students say:*
@@ -353,6 +353,53 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         for p in progress:
             msg += f"📅 {p[6][:10]}\n📝 {p[2]}\n🎯 Score: {p[3]}/{p[4]}\n🏆 Band: {p[5]}\n─────────────\n"
         await update.message.reply_text(msg, parse_mode="Markdown")
+        return MENU
+    
+    elif "Account" in text:
+        db_user = get_user(update.effective_user.id)
+        if not db_user:
+            await update.message.reply_text("❌ Account not found!")
+            return MENU
+
+        can_test, reason = can_take_test(update.effective_user.id)
+        tests_remaining = db_user[9]
+        status = db_user[4]
+        trial_start = db_user[5]
+        sub_end = db_user[6]
+        joined = db_user[8]
+
+        if reason == "admin":
+            status_msg = "👑 Admin — Unlimited Access"
+        elif reason == "subscribed":
+            status_msg = "✅ Active Subscription"
+        elif can_test and status == "trial":
+            status_msg = "🆓 Free Trial"
+        elif can_test:
+            status_msg = f"🔋 {tests_remaining} tests remaining"
+        else:
+            status_msg = "⚠️ No tests remaining"
+
+        msg = f"👤 *Your Account*\n\n"
+        msg += f"📊 Status: {status_msg}\n"
+        msg += f"🔋 Tests remaining: {tests_remaining}\n"
+
+        if status == "trial" and trial_start:
+            msg += f"🆓 Trial started: {trial_start[:10]}\n"
+
+        if status == "active" and sub_end:
+            msg += f"📅 Subscription started: {trial_start[:10] if trial_start else 'N/A'}\n"
+            msg += f"⏰ Subscription ends: {sub_end[:10]}\n"
+
+        if reason == "admin":
+            msg += f"\n👑 You have unlimited admin access!"
+        elif not can_test:
+            msg += f"\n⚠️ You have run out of tests!"
+
+        keyboard = [[InlineKeyboardButton("🔋 Top Up — 10 tests for 5,000 UZS", callback_data="topup_payme")]]
+        if status != "active":
+            keyboard.append([InlineKeyboardButton("💎 Subscribe — 10,000 UZS/month", callback_data="subscribe_payme")])
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await update.message.reply_text(msg, parse_mode="Markdown", reply_markup=reply_markup)
         return MENU
 
     elif "Leaderboard" in text:
@@ -730,6 +777,7 @@ def main():
 
     from telegram.ext import CallbackQueryHandler
     app.add_handler(CallbackQueryHandler(handle_admin_callback, pattern="^(activate_sub_|activate_topup_|reject_)"))
+    app.add_handler(CallbackQueryHandler(handle_payme_payment, pattern="^(payme_subscribe|payme_topup|stars_subscribe|stars_topup|topup_payme|subscribe_payme)"))
 
     conv_handler = ConversationHandler(
         entry_points=[
