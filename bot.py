@@ -4,7 +4,8 @@ from database import init_db, add_user, get_user, can_take_test, use_test, add_t
 from ai_generator import generate_listening_test, generate_reading_test, generate_grammar_lesson, generate_vocabulary_lesson, generate_writing_tips, generate_speaking_tips, generate_uzbek_lesson, generate_russian_lesson, text_to_audio, get_band_score
 from datetime import datetime
 
-TOKEN = "8045515670:AAFvBFVTbfKS4fvc1qDvSeIc2kDgUxT4_K4"
+import os
+TOKEN = os.environ.get("TOKEN")
 ADMIN_PASSWORD = "Sweetmama1980"
 SUPPORT_CHAT_ID = 1882454220
 PAYME_CARD = "9860100126345302"
